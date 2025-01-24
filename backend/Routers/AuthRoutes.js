@@ -1,11 +1,9 @@
-const router = require('express').Router()
+const express = require('express');
+const router = express.Router();
+const { signupValidation, loginValidation } = require('../Middlewares/AuthMiddleWare');
+const { signup,login } = require('../Controllers/AuthController');
 
-router.post('/login',(req,res)=>{
-    console.log("Login success")
-})
+router.post('/signup', signupValidation, signup);
+router.post('/login', loginValidation, login);
 
-router.post('/signup',(req,res)=>{
-    console.log("Signup success")
-})
-
-module.exports = router
+module.exports = router;
