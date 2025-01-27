@@ -1,9 +1,101 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // Ensure you import `useNavigate`
+import { ToastContainer, toast } from 'react-toastify'; // Ensure `toast` is imported
+import 'react-toastify/dist/ReactToastify.css'; // Import the styles for Toastify
+import { handleError } from '../utils';
 
 const Login = () => {
-  return (
-    <div>Login</div>
-  )
-}
+  const [LoginInfo, setLoginInfo] = useState({
+    email: '',
+    password: '',
+  });
 
-export default Login
+  const navigate = useNavigate(); // Ensure `navigate` is defined
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLoginInfo((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const { email, password } = LoginInfo;
+
+    if (!email || !password) {
+      return toast.error('All fields are required');
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email, password }),
+      });
+
+      const result = await response.json();
+      const {success, message,jwtToken,name, error} = result;
+     
+      if (success) {
+        toast.success('Login successful'); // `toast` is properly defined here
+        setTimeout(() => {
+          localStorage.setItem('token',jwtToken)
+          localStorage.setItem('LoggedInUser',name)
+          navigate('/home'); // `navigate` is properly defined here
+        }, 1000);
+      } else if (error ){
+        const details = error?.details[0].message;
+        return handleError(details)
+        // return toast.error(result.message || 'Signup failed');
+       
+      }
+
+
+
+    } catch (err) {
+      console.error('Error during login:', err);
+      toast.error(err.message || 'An error occurred while loging in');
+    }
+  };
+
+  return (
+    <div className="container">
+      <form onSubmit={handleLogin}>
+        <h1>Login Form</h1>
+        
+        <div>
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            value={LoginInfo.email}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label htmlFor="password">Password</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            value={LoginInfo.password}
+            onChange={handleChange}
+          />
+        </div>
+        <button type="submit">Login</button>
+        <span>
+          Don't have an account? <Link to="/signup">SignUp</Link>
+        </span>
+      </form>
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default Login;
