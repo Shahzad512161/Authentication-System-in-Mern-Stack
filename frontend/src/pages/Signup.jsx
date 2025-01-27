@@ -40,7 +40,7 @@ const Signup = () => {
       });
 
       const result = await response.json();
-      const {success, message, error} = result;
+      const {success, error} = result;
       console.log('Server response:', result);
 
       if (success) {

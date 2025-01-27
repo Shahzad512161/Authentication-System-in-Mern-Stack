@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Ensure you import `useNavigate`
 import { ToastContainer, toast } from 'react-toastify'; // Ensure `toast` is imported
 import 'react-toastify/dist/ReactToastify.css'; // Import the styles for Toastify
-import { handleError } from '../utils';
+// import { handleError } from '../utils';
 
 const Login = () => {
   const [LoginInfo, setLoginInfo] = useState({
@@ -22,44 +22,41 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     const { email, password } = LoginInfo;
-
+  
     if (!email || !password) {
       return toast.error('All fields are required');
     }
-
+  
     try {
       const response = await fetch('http://localhost:8080/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email, password }),
+        body: JSON.stringify({ email, password }),
       });
-
+  
       const result = await response.json();
-      const {success, message,jwtToken,name, error} = result;
-     
+      console.log('Login Response:', result); // Debugging
+  
+      const { success, jwtToken, name, error } = result;
+  
       if (success) {
-        toast.success('Login successful'); // `toast` is properly defined here
+        localStorage.setItem('token', jwtToken); // Set immediately
+        localStorage.setItem('LoggedInUser', name);
+        toast.success('Login successful');
         setTimeout(() => {
-          localStorage.setItem('token',jwtToken)
-          localStorage.setItem('LoggedInUser',name)
-          navigate('/home'); // `navigate` is properly defined here
+          navigate('/main');
         }, 1000);
-      } else if (error ){
-        const details = error?.details[0].message;
-        return handleError(details)
-        // return toast.error(result.message || 'Signup failed');
-       
+      } else if (error) {
+        const details = error?.details[0]?.message;
+        return toast.error(details || 'Login failed');
       }
-
-
-
     } catch (err) {
       console.error('Error during login:', err);
-      toast.error(err.message || 'An error occurred while loging in');
+      toast.error(err.message || 'An error occurred while logging in');
     }
   };
 
