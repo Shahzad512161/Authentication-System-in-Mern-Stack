@@ -8,10 +8,10 @@ const ensureAuthenticated = require("./Middlewares/Auth")
 require("./config/db"); // Assuming this file connects to your MongoDB database
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(express.json());
 
 app.use('/auth', AuthRouter);
 app.use('/product',ensureAuthenticated, ProductRoutes);
